@@ -248,9 +248,9 @@ class GAExperiment(object):
         op (AbstractOptimizationProblem): Optimization problem object.
         trials (int): Number of trials to run.
         iterations (int): Number of iterations to optimize over.
-        ga_p (float): Population.
-        ga_ma (float): Mating rate.
-        ga_mu (float): Mutation rate.
+        ga_p (int): Population.
+        ga_ma (int): Mating rate.
+        ga_mu (int): Mutation rate.
 
     """
     def __init__(self, op, numTrials, maxIters, p, ma, mu):
@@ -324,9 +324,9 @@ class MIMICExperiment(object):
         op (AbstractOptimizationProblem): Optimization problem object.
         trials (int): Number of trials to run.
         iterations (int): Number of iterations to optimize over.
-        ga_m (float): Population.
-        ga_ma (float): Mating rate.
-        ga_mu (float): Mutation rate.
+        s (int): Samples to generate.
+        k (float): Samples to keep.
+        m (float): Mutation rate.
 
     """
     def __init__(self, op, numTrials, maxIters, s, k, m):

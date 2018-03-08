@@ -25,7 +25,7 @@ from opt_base import MIMICExperiment
 def run(oa, tsp_n, ff_n, cp_n, cp_t, sa_cr, ga_p, ga_ma, ga_mu, ms, mk, mm):
     # set experiment parameters
     iters = 5000
-    trials = 30
+    trials = 10
 
     # initialize optimization problem
     tsp = TravellingSalesmanOP(N=tsp_n, subtype='route')

@@ -14,7 +14,7 @@ public class ContinuousPeaksEvaluationFunction implements EvaluationFunction {
      * The t value
      */
     private int t;
-    
+
     /**
      * Make a new continuous peaks function
      * @param t the t value
@@ -22,6 +22,13 @@ public class ContinuousPeaksEvaluationFunction implements EvaluationFunction {
     public ContinuousPeaksEvaluationFunction(int t) {
         this.t = t;
     }
+
+    /**
+     * Track number of times value() is called.
+     * Expected to be incremented by all value() calls.
+     */
+
+    public long valueCallCount = 0;
 
     /**
      * @see opt.EvaluationFunction#value(opt.OptimizationData)
@@ -32,30 +39,26 @@ public class ContinuousPeaksEvaluationFunction implements EvaluationFunction {
         int count = 0;
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) == 0) {
-                count++;
+                max0 = Math.max(max0, ++count);
             } else {
-                if (count > max0) {
-                    max0 = count;
-                    count = 0;
-                }
+                count = 0;
             }
         }
         int max1 = 0;
-       count = 0;
+        count = 0;
         for (int i = 0; i < data.size(); i++) {
             if (data.get(i) == 1) {
-                count++;
+                max1 = Math.max(max1, ++count);
             } else {
-                if (count > max1) {
-                    max1 = count;
-                    count = 0;
-                }
+                count = 0;
             }
         }
         int r = 0;
         if (max1 > t && max0 > t) {
             r = data.size();
         }
+        this.valueCallCount += 1;
         return Math.max(max1, max0) + r;
+
     }
 }
