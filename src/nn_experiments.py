@@ -50,7 +50,8 @@ def run(oa, iterations, sa_t, sa_c, ga_p, ga_ma, ga_mu):
     # remove existing results file, if it exists
     try:
         os.remove(resfile)
-    except:
+    except Exception as e:
+        print e
         pass
 
     # recreate base results file

@@ -1,18 +1,20 @@
+import os
+import time
 from array import array
 from helpers import get_abspath
+from java.util import Random
+from opt import SwapNeighbor, DiscreteChangeOneNeighbor
+from opt import RandomizedHillClimbing, GenericHillClimbingProblem
 from opt.example import TravelingSalesmanRouteEvaluationFunction
 from opt.example import TravelingSalesmanSortEvaluationFunction
 from opt.example import FlipFlopEvaluationFunction
 from opt.example import ContinuousPeaksEvaluationFunction
-from java.util import Random
+from shared import FixedIterationTrainer
+from dist import DiscreteUniformDistribution
 
 import sys
-import os
-import time
-from time import clock
 from itertools import product
 
-from dist import DiscreteUniformDistribution
 from dist import DiscreteDependencyTree
 from dist import Distribution
 from dist import DiscretePermutationDistribution
@@ -23,12 +25,9 @@ import java.lang.String as String
 import java.lang.StringBuffer as StringBuffer
 import java.lang.Boolean as Boolean
 
-import opt.DiscreteChangeOneNeighbor as DiscreteChangeOneNeighbor
 import opt.EvaluationFunction as EvaluationFunction
-import opt.GenericHillClimbingProblem as GenericHillClimbingProblem
 import opt.HillClimbingProblem as HillClimbingProblem
 import opt.NeighborFunction as NeighborFunction
-import opt.RandomizedHillClimbing as RandomizedHillClimbing
 import opt.SimulatedAnnealing as SimulatedAnnealing
 import opt.example.FourPeaksEvaluationFunction as FourPeaksEvaluationFunction
 import opt.ga.CrossoverFunction as CrossoverFunction
@@ -39,218 +38,187 @@ import opt.ga.GeneticAlgorithmProblem as GeneticAlgorithmProblem
 import opt.ga.MutationFunction as MutationFunction
 import opt.ga.StandardGeneticAlgorithm as StandardGeneticAlgorithm
 import opt.ga.UniformCrossOver as UniformCrossOver
-import opt.prob.GenericProbabilisticOptimizationProblem as GenericProbabilisticOptimizationProblem
+from opt.prob import GenericProbabilisticOptimizationProblem
 import opt.prob.MIMIC as MIMIC
 from opt.prob import ProbabilisticOptimizationProblem
-import shared.FixedIterationTrainer as FixedIterationTrainer
-import opt.SwapNeighbor as SwapNeighbor
 import opt.ga.SwapMutation as SwapMutation
 import opt.example.TravelingSalesmanCrossOver as TravelingSalesmanCrossOver
 import shared.Instance as Instance
 import util.ABAGAILArrays as ABAGAILArrays
 
 
-class OptimizationProblem(object):
-    """Optimization problem object. Creates an optimization problem and
-    returns the evaluation function and any other relevant variables.
+class TravellingSalesmanOP(object):
+    """Travelling salesman optimization problem.
+
+    Args:
+        N (int): Number of points in the route.
+        subtype (str): Sort or route-based.
 
     """
+    def __init__(self, N, subtype='route'):
+        self.N = N
+        self.subtype = subtype
 
-    def tsp(self, N=20, type='route'):
-        """Creates a new travelling salesman route problem with the specified
-        parameters.
+    def get_ef(self):
+        """Creates a new travelling salesman route evaluation function with
+        the specified class variables.
 
-        Args
-            N (int): Number of "locations" or points in the route.
-            type (str): Determines if evaluation function is sort or
-            route-based.
         Returns
+            ranges (array): Array of values as specified by N.
             ef (TravelingSalesmanEvaluationFunction): Evaluation function.
 
         """
         random = Random()
-        points = [[0 for x in xrange(2)] for x in xrange(N)]
+        points = [[0 for x in xrange(2)] for x in xrange(self.N)]
         for i in range(0, len(points)):
             points[i][0] = random.nextDouble()
             points[i][1] = random.nextDouble()
 
         # create ranges
-        fill = [N] * N
+        fill = [self.N] * self.N
         ranges = array('i', fill)
 
-        if type == 'route':
-            return TravelingSalesmanRouteEvaluationFunction(points), ranges
-        elif type == 'sort':
-            return TravelingSalesmanSortEvaluationFunction(points), ranges
+        if self.subtype == 'route':
+            return ranges, TravelingSalesmanRouteEvaluationFunction(points)
+        elif self.subtype == 'sort':
+            return ranges, TravelingSalesmanSortEvaluationFunction(points)
 
-    def flipflop(self, N=50):
-        """Creates a new flip flop problem with the specified parameters
 
-        Args:
-            N (int): Number of binary elements.
+class FlipFlopOP(object):
+    """Flip flop optimization problem.
+
+    Args:
+        N (int): Number of elements.
+
+    """
+    def __init__(self, N):
+        self.N = N
+
+    def get_ef(self):
+        """Creates a new flip flop problem with the specified class variables.
+
         Returns:
             ranges (array): Array of values as specified by N.
             ef (FlipFlopEvaluationFunction): Evaluation function.
 
         """
-        fill = [2] * N
+        fill = [2] * self.N
         ranges = array('i', fill)
 
         return ranges, FlipFlopEvaluationFunction()
 
-    def continuouspeaks(self, T=20, N=100):
+
+class ContinuousPeaksOP(object):
+    """Flip flop optimization problem.
+
+    Args:
+        N (int): Number of elements.
+        T (int): Reward threshold for contiguous bits.
+
+    """
+    def __init__(self, N, T):
+        self.N = N
+        self.T = T
+
+    def get_ef(self):
         """Creates a new continuous peaks problem with the specified
         parameters.
 
-        Args:
-            N (int): Number of binary elements.
-            T (int): Reward threshold for contiguous bits.
         Returns:
-            ranges (array): Array of values as specifieed by N.
+            ranges (array): Array of values as specified by N.
             ef (ContinuousPeaksEvaluationFunction): Evaluation function.
 
         """
-        fill = [2] * N
+        fill = [2] * self.N
         ranges = array('i', fill)
 
-        return ranges, ContinuousPeaksEvaluationFunction(T)
+        return ranges, ContinuousPeaksEvaluationFunction(self.T)
 
 
 class RHCExperiment(object):
     """Creates a randomized hill climbing experiment object.
 
     Args:
+        op (AbstractOptimizationProblem): Optimization problem object.
         trials (int): Number of trials to run.
         iterations (int): Number of iterations to optimize over.
 
     """
-    def __init__(self, trials, iterations):
-        self.trials = trials
-        self.iterations = iterations
+    def __init__(self, op, numTrials, maxIters):
+        self.op = op
+        self.numTrials = numTrials
+        self.maxIters = maxIters
 
-    def run_experiment(self, ef, ranges):
+    def run_experiment(self, opName='TSP'):
+        """Run a randomized hill climbing optimization experiment for a given
+        optimization problem.
 
+        Args:
+            ef (AbstractEvaluationFunction): Evaluation function.
+            ranges (array): Search space ranges.
+            op (str): Name of optimization problem.
 
+        """
+        outdir = 'results/OPT/{}'.format(opName)  # get results directory
+        fname = get_abspath('RHC_results.csv', outdir)  # get output filename
 
+        # delete existing results file, if it already exists
+        try:
+            os.remove(fname)
+        except Exception as e:
+            print e
+            pass
 
+        with open(fname, 'w') as f:
+            f.write('iterations,fitness,time,fevals,trial\n')
 
-
-
-class MIMICExperiment(object):
-    """Creates a MIMIC experiment object.
-
-    """
-
-
-class SAExperiment(object):
-    """Creates a simulated annealing experiment object.
-
-    """
-
-
-class GAExperiment(object):
-    """Creates a genetic algorithm experiment object.
-
-    """
-
-    outfile = './TSP/TSP_@ALG@_@N@_LOG.txt'
-    ef = TravelingSalesmanRouteEvaluationFunction(points)
-    odd = DiscretePermutationDistribution(N)
-    nf = SwapNeighbor()
-    mf = SwapMutation()
-    cf = TravelingSalesmanCrossOver(ef)
-    hcp = GenericHillClimbingProblem(ef, odd, nf)
-    gap = GenericGeneticAlgorithmProblem(ef, odd, mf, cf)
-
-    MIMIC - TSP
-    ef = TravelingSalesmanSortEvaluationFunction(points)
-    odd = DiscreteUniformDistribution(ranges)
-
-    for t in range(numTrials):
-        for samples, keep, m in product([100], [50], [0.1, 0.3, 0.5, 0.7, 0.9]):
-            fname = outfile.replace('@ALG@', 'MIMIC{}_{}_{}'.format(
-                samples, keep, m)).replace('@N@', str(t + 1))
-            df = DiscreteDependencyTree(m, ranges)
-            with open(fname, 'w') as f:
-                f.write('iterations,fitness,time,fevals\n')
-            ef = TravelingSalesmanSortEvaluationFunction(points)
-            pop = GenericProbabilisticOptimizationProblem(ef, odd, df)
-            mimic = MIMIC(samples, keep, pop)
-            fit = FixedIterationTrainer(mimic, 10)
-            times = [0]
-            for i in range(0, maxIters, 10):
-                start = clock()
-                fit.train()
-                elapsed = time.clock() - start
-                times.append(times[-1] + elapsed)
-                fevals = ef.fevals
-                score = ef.value(mimic.getOptimal())
-                ef.fevals -= 1
-                st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
-                print st
-                with open(fname, 'a') as f:
-                    f.write(st)
-
-    # SA - TSP
-    for t in range(numTrials):
-        for CE in [0.15, 0.35, 0.55, 0.75, 0.95]:
-            fname = outfile.replace('@ALG@', 'SA{}'.format(
-                CE)).replace('@N@', str(t + 1))
-            with open(fname, 'w') as f:
-                f.write('iterations,fitness,time,fevals\n')
-            ef = TravelingSalesmanRouteEvaluationFunction(points)
+        # start experiment
+        for t in range(self.numTrials):
+            # initialize optimization problem and training functions
+            ranges, ef = self.op.get_ef()
+            nf = None
+            if opName == 'TSP':
+                nf = SwapNeighbor()
+            else:
+                nf = DiscreteChangeOneNeighbor(ranges)
+            odd = DiscreteUniformDistribution(ranges)  # get ranges
             hcp = GenericHillClimbingProblem(ef, odd, nf)
-            sa = SimulatedAnnealing(1E10, CE, hcp)
-            fit = FixedIterationTrainer(sa, 10)
-            times = [0]
-            for i in range(0, maxIters, 10):
-                start = clock()
+            rhc = RandomizedHillClimbing(hcp)
+            fit = FixedIterationTrainer(rhc, 10)
+
+            # run experiment and train evaluation function
+            start = time.clock()
+            for i in range(0, self.maxIters, 10):
                 fit.train()
                 elapsed = time.clock() - start
-                times.append(times[-1] + elapsed)
-                fevals = ef.fevals
-                score = ef.value(sa.getOptimal())
-                ef.fevals -= 1
-                st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
-                print st
-                with open(fname, 'a') as f:
-                    f.write(st)
+                fe = ef.valueCallCount
+                score = ef.value(rhc.getOptimal())
+                ef.valueCallCount -= 1
 
-    # GA - TSP
-    for t in range(numTrials):
-        for pop, mate, mutate in product([100], [50, 30, 10], [50, 30, 10]):
-            fname = outfile.replace('@ALG@', 'GA{}_{}_{}'.format(
-                pop, mate, mutate)).replace('@N@', str(t + 1))
-            with open(fname, 'w') as f:
-                f.write('iterations,fitness,time,fevals\n')
-            ef = TravelingSalesmanRouteEvaluationFunction(points)
-            gap = GenericGeneticAlgorithmProblem(ef, odd, mf, cf)
-            ga = StandardGeneticAlgorithm(pop, mate, mutate, gap)
-            fit = FixedIterationTrainer(ga, 10)
-            times = [0]
-            for i in range(0, maxIters, 10):
-                start = clock()
-                fit.train()
-                elapsed = time.clock() - start
-                times.append(times[-1] + elapsed)
-                fevals = ef.fevals
-                score = ef.value(ga.getOptimal())
-                ef.fevals -= 1
-                st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
-                print st
-                with open(fname, 'a') as f:
-                    f.write(st)
+                # write results to output file
+                s = '{},{},{},{},{}\n'.format(i + 10, score, fe, elapsed, t)
+                with open(fname, 'a+') as f:
+                    f.write(s)
 
-
+        # return res
 
 
 if __name__ == '__main__':
     # set experiment parameters
     maxIters = 3000
-    numTrials = 5
+    numTrials = 20
 
-    # test
-    OP = OptimizationProblem()
-    ranges, ef = OP.flipflop(N=5)
-    print ranges
-    print ef
+    # initialize optimization problem
+    tsp = TravellingSalesmanOP(N=100, subtype='route')
+    ff = FlipFlopOP(N=1000)
+    cp = ContinuousPeaksOP(N=100, T=49)
+
+    # set up experiment
+    RHC = RHCExperiment(op=tsp, numTrials=numTrials, maxIters=maxIters)
+    RHC.run_experiment(opName='TSP')
+
+    RHC = RHCExperiment(op=ff, numTrials=numTrials, maxIters=maxIters)
+    RHC.run_experiment(opName='FF')
+
+    RHC = RHCExperiment(op=cp, numTrials=numTrials, maxIters=maxIters)
+    RHC.run_experiment(opName='CP')

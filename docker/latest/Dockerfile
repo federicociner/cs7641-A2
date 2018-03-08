@@ -40,7 +40,7 @@ ENV PATH="${PATH}:/opt/ant/bin"
 
 # clone ABAGAIL repo, build jar using Ant, add to Java CLASSPATH and install additional Jython packages
 RUN cd /home \
-    && git clone https://github.com/wollerman/ABAGAIL.git \
+    && git clone https://github.com/federicociner/ABAGAIL.git \
     && cd /home/ABAGAIL && ant \
     && echo 'export CLASSPATH=.:/home/ABAGAIL/ABAGAIL.jar' >> ~/.bashrc \
     && jython -m easy_install click
