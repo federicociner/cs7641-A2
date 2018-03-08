@@ -112,6 +112,33 @@ for t in range(numTrials):
             with open(fname, 'a') as f:
                 f.write(st)
 
+# MIMIC - CP
+for t in range(numTrials):
+    for samples, keep, m in product([100], [50], [0.1, 0.3, 0.5, 0.7, 0.9]):
+        fname = outfile.replace('@ALG@', 'MIMIC{}_{}_{}'.format(
+            samples, keep, m)).replace('@N@', str(t + 1))
+        with open(fname, 'w') as f:
+            f.write('iterations,fitness,time,fevals\n')
+        ef = ContinuousPeaksEvaluationFunction(T)
+        odd = DiscreteUniformDistribution(ranges)
+        df = DiscreteDependencyTree(m, ranges)
+        pop = GenericProbabilisticOptimizationProblem(ef, odd, df)
+        mimic = MIMIC(samples, keep, pop)
+        fit = FixedIterationTrainer(mimic, 10)
+        times = [0]
+        for i in range(0, maxIters, 10):
+            start = clock()
+            fit.train()
+            elapsed = time.clock() - start
+            times.append(times[-1] + elapsed)
+            fevals = ef.fevals
+            score = ef.value(mimic.getOptimal())
+            ef.fevals -= 1
+            st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
+            print st
+            with open(fname, 'a') as f:
+                f.write(st)
+
 # GA - CP
 for t in range(numTrials):
     for pop, mate, mutate in product([100], [50, 30, 10], [50, 30, 10]):
@@ -121,7 +148,6 @@ for t in range(numTrials):
             f.write('iterations,fitness,time,fevals\n')
         ef = ContinuousPeaksEvaluationFunction(T)
         odd = DiscreteUniformDistribution(ranges)
-        nf = DiscreteChangeOneNeighbor(ranges)
         mf = DiscreteChangeOneMutation(ranges)
         cf = SingleCrossOver()
         gap = GenericGeneticAlgorithmProblem(ef, odd, mf, cf)
@@ -135,37 +161,6 @@ for t in range(numTrials):
             times.append(times[-1] + elapsed)
             fevals = ef.fevals
             score = ef.value(ga.getOptimal())
-            ef.fevals -= 1
-            st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
-            print st
-            with open(fname, 'a') as f:
-                f.write(st)
-
-# MIMIC - CP
-for t in range(numTrials):
-    for samples, keep, m in product([100], [50], [0.1, 0.3, 0.5, 0.7, 0.9]):
-        fname = outfile.replace('@ALG@', 'MIMIC{}_{}_{}'.format(
-            samples, keep, m)).replace('@N@', str(t + 1))
-        with open(fname, 'w') as f:
-            f.write('iterations,fitness,time,fevals\n')
-        ef = ContinuousPeaksEvaluationFunction(T)
-        odd = DiscreteUniformDistribution(ranges)
-        nf = DiscreteChangeOneNeighbor(ranges)
-        mf = DiscreteChangeOneMutation(ranges)
-        cf = SingleCrossOver()
-        gap = GenericGeneticAlgorithmProblem(ef, odd, mf, cf)
-        df = DiscreteDependencyTree(m, ranges)
-        pop = GenericProbabilisticOptimizationProblem(ef, odd, df)
-        mimic = MIMIC(samples, keep, pop)
-        fit = FixedIterationTrainer(mimic, 10)
-        times = [0]
-        for i in range(0, maxIters, 10):
-            start = clock()
-            fit.train()
-            elapsed = time.clock() - start
-            times.append(times[-1] + elapsed)
-            fevals = ef.fevals
-            score = ef.value(mimic.getOptimal())
             ef.fevals -= 1
             st = '{},{},{},{}\n'.format(i, score, times[-1], fevals)
             print st
