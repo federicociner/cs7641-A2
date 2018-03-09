@@ -167,7 +167,7 @@ class RHCExperiment(object):
                 ef.valueCallCount -= 1
 
                 # write results to output file
-                s = '{},{},{},{},{}\n'.format(i + 10, score, fe, elapsed, t)
+                s = '{},{},{},{},{}\n'.format(i + 10, score, elapsed, fe, t)
                 with open(fname, 'a+') as f:
                     f.write(s)
 
@@ -236,7 +236,7 @@ class SAExperiment(object):
                 ef.valueCallCount -= 1
 
                 # write results to output file
-                s = '{},{},{},{},{}\n'.format(i + 10, score, fe, elapsed, t)
+                s = '{},{},{},{},{}\n'.format(i + 10, score, elapsed, fe, t)
                 with open(fname, 'a+') as f:
                     f.write(s)
 
@@ -312,7 +312,7 @@ class GAExperiment(object):
                 ef.valueCallCount -= 1
 
                 # write results to output file
-                s = '{},{},{},{},{}\n'.format(i + 10, score, fe, elapsed, t)
+                s = '{},{},{},{},{}\n'.format(i + 10, score, elapsed, fe, t)
                 with open(fname, 'a+') as f:
                     f.write(s)
 
@@ -382,6 +382,6 @@ class MIMICExperiment(object):
                 ef.valueCallCount -= 1
 
                 # write results to output file
-                s = '{},{},{},{},{}\n'.format(i + 10, score, fe, elapsed, t)
+                s = '{},{},{},{},{}\n'.format(i + 10, score, elapsed, fe, t)
                 with open(fname, 'a+') as f:
                     f.write(s)
