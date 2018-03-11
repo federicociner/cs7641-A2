@@ -13,4 +13,4 @@ jython opt_experiments.py --oa GA --ga_p 50 --ga_ma 10 --ga_mu 10
 jython opt_experiments.py --oa MIMIC --mm 0.3
 
 # aggregate datasets and generate plots
-# python opt_plots.py
+python opt_plots.py
