@@ -12,7 +12,7 @@ import click
 @click.option('--oa', default='BP', help='Optimization algorithm name.')
 @click.option('--iterations', default=1000, help='Number of iterations.')
 @click.option('--sa_t', default=1E10, help='Temperature (SA only).')
-@click.option('--sa_c', default=0.10, help='Cooling rate (SA only).')
+@click.option('--sa_c', default=0.10, help='Cooling exponent (SA only).')
 @click.option('--ga_p', default=50, help='Population size (GA only).')
 @click.option('--ga_ma', default=10, help='# population to mate (GA only).')
 @click.option('--ga_mu', default=10, help='# population to mutate (GA only).')

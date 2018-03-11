@@ -106,13 +106,54 @@ def plot_curves(rhcRes, saRes, gaRes, mimicRes, opName, c):
     plt.clf()
 
 
+def problem_complexity(opName, p='N'):
+    """Creates problem complexity/size curves for the specified optimization
+    problem.
+
+    Args:
+        opName (str): Name of optimization problem.
+        p (str): Name of problem parameter.
+
+    """
+    opTitles = {'TSP': 'Travelling Salesman Problem',
+                'FF': 'Flip Flop', 'CP': 'Continuous Peaks'}
+    resdir = 'results/OPT/ProblemComplexity'
+    pTitle = opTitles[opName]
+
+    df = pd.read_csv(get_abspath('{}.csv'.format(opName), resdir))
+    X = df[p]
+    RHC = df['RHC']
+    SA = df['SA']
+    GA = df['GA']
+    MIMIC = df['MIMIC']
+
+    # create figure
+    plt.figure(0)
+    plt.plot(X, RHC, color='k', label='RHC')
+    plt.plot(X, SA, color='r', label='SA')
+    plt.plot(X, GA, color='g', label='GA')
+    plt.plot(X, MIMIC, color='b', label='MIMIC')
+    plt.legend(loc='best')
+    plt.grid(color='grey', linestyle='dotted')
+    plt.xlabel(p)
+    plt.xticks(X)
+    plt.title('{} - Fitness Score vs. Problem Size'.format(pTitle))
+    plt.ylabel('Fitness Score')
+
+    # save problem complexity plot as PNG
+    plotdir = 'plots/OPT/ProblemComplexity'
+    plotpath = get_abspath('{}_pcCurve.png'.format(opName), plotdir)
+    plt.savefig(plotpath, bbox_inches='tight')
+    plt.clf()
+
+
 if __name__ == '__main__':
     # group all results datasets
-    p = os.path.abspath(os.path.join(os.curdir, os.pardir, 'results/OPT'))
+    p = os.path.abspath(os.path.join(os.curdir, os.pardir, 'results/OPT/Archive'))
     for root, dirs, files in os.walk(p):
         for file in files:
             if file.endswith('results.csv'):
-                group_results(resfile=os.path.join(root, file))
+                group_results(resfile=os.path.join(root, file), aggtype='max')
 
     # get result file names
     rhcRes = 'RHC_results.csv'
@@ -132,3 +173,8 @@ if __name__ == '__main__':
     plot_curves(rhcRes, saRes, gaRes, mimicRes, opName='TSP', c='fevals')
     plot_curves(rhcRes, saRes, gaRes, mimicRes, opName='FF', c='fevals')
     plot_curves(rhcRes, saRes, gaRes, mimicRes, opName='CP', c='fevals')
+
+    # plot problem complexity
+    problem_complexity(opName='TSP', p='N')
+    problem_complexity(opName='CP', p='T')
+    problem_complexity(opName='FF', p='N')

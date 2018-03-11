@@ -324,41 +324,41 @@ def sa_validation_curve():
 
     # create validation curve for training data
     plt.figure(0)
-    plt.plot(iters, train_15, color='b', label='CR: 0.15')
-    plt.plot(iters, train_30, color='g', label='CR: 0.30')
-    plt.plot(iters, train_45, color='r', label='CR: 0.45')
-    plt.plot(iters, train_60, color='c', label='CR: 0.60')
-    plt.plot(iters, train_75, color='k', label='CR: 0.75')
-    plt.plot(iters, train_90, color='m', label='CR: 0.90')
+    plt.plot(iters, train_15, color='b', label='CE: 0.15')
+    plt.plot(iters, train_30, color='g', label='CE: 0.30')
+    plt.plot(iters, train_45, color='r', label='CE: 0.45')
+    plt.plot(iters, train_60, color='c', label='CE: 0.60')
+    plt.plot(iters, train_75, color='k', label='CE: 0.75')
+    plt.plot(iters, train_90, color='m', label='CE: 0.90')
     plt.legend(loc='best')
     plt.grid(color='grey', linestyle='dotted')
-    plt.title('SA Validation Curve - Cooling Rate (train)')
+    plt.title('SA Validation Curve - Cooling Exponent (train)')
     plt.xlabel('Iterations')
     plt.ylabel('Mean squared error')
 
     # save train validation curve plot as PNG
     plotdir = 'plots/NN/SA'
-    plotpath = get_abspath('SA_CR_train.png', plotdir)
+    plotpath = get_abspath('SA_CE_train.png', plotdir)
     plt.savefig(plotpath, bbox_inches='tight')
     plt.clf()
 
     # create validation curve for test data
     plt.figure(0)
-    plt.plot(iters, test_15, color='b', label='CR: 0.15')
-    plt.plot(iters, test_30, color='g', label='CR: 0.30')
-    plt.plot(iters, test_45, color='r', label='CR: 0.45')
-    plt.plot(iters, test_60, color='c', label='CR: 0.60')
-    plt.plot(iters, test_75, color='k', label='CR: 0.75')
-    plt.plot(iters, test_90, color='m', label='CR: 0.90')
+    plt.plot(iters, test_15, color='b', label='CE: 0.15')
+    plt.plot(iters, test_30, color='g', label='CE: 0.30')
+    plt.plot(iters, test_45, color='r', label='CE: 0.45')
+    plt.plot(iters, test_60, color='c', label='CE: 0.60')
+    plt.plot(iters, test_75, color='k', label='CE: 0.75')
+    plt.plot(iters, test_90, color='m', label='CE: 0.90')
     plt.legend(loc='best')
     plt.grid(color='grey', linestyle='dotted')
-    plt.title('SA Validation Curve - Cooling Rate (test)')
+    plt.title('SA Validation Curve - Cooling Exponent (test)')
     plt.xlabel('Iterations')
     plt.ylabel('Mean squared error')
 
     # save test validation curve plot as PNG
     plotdir = 'plots/NN/SA'
-    plotpath = get_abspath('SA_CR_test.png', plotdir)
+    plotpath = get_abspath('SA_CE_test.png', plotdir)
     plt.savefig(plotpath, bbox_inches='tight')
     plt.clf()
 
@@ -432,7 +432,7 @@ def ga_mating_curve():
     """
     # load datasets
     resdir = 'results/NN/GA'
-    df_10= pd.read_csv(get_abspath('results_50_10_10.csv', resdir))
+    df_10 = pd.read_csv(get_abspath('results_50_10_10.csv', resdir))
     df_20 = pd.read_csv(get_abspath('results_50_20_10.csv', resdir))
     df_30 = pd.read_csv(get_abspath('results_50_30_10.csv', resdir))
 
