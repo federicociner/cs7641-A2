@@ -2,7 +2,7 @@
 ### Federico Ciner (fciner3)
 ### Spring 2018
 
-This project contains all of the necessary code and data to run the experiments used in CS741 Assignment 2.
+This project contains all of the necessary code and data to run the experiments used in CS7641 Assignment 2.
 
 ## Setup
 
