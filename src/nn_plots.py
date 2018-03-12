@@ -482,7 +482,10 @@ def ga_mating_curve():
     plt.clf()
 
 
-if __name__ == '__main__':
+def main():
+    """Run code to generate plots for NN experiments.
+
+    """
     # get datasets for error and accuracy curves
     resdir = 'results/NN'
     BP = pd.read_csv(get_abspath('BP/results.csv', resdir))
@@ -516,3 +519,7 @@ if __name__ == '__main__':
     combined_error(combined)
     combined_acc(combined)
     combined_time(combined)
+
+
+if __name__ == '__main__':
+    main()

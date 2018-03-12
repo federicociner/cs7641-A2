@@ -22,7 +22,7 @@ from opt_base import MIMICExperiment
 @click.option('--ms', default=100, help='MIMIC - Samples.')
 @click.option('--mk', default=50, help='MIMIC - # Samples to keep.')
 @click.option('--mm', default=0.3, help='MIMIC - m.')
-def run(oa, tsp_n, ff_n, cp_n, cp_t, sa_cr, ga_p, ga_ma, ga_mu, ms, mk, mm):
+def main(oa, tsp_n, ff_n, cp_n, cp_t, sa_cr, ga_p, ga_ma, ga_mu, ms, mk, mm):
     # set experiment parameters
     iters = 5000
     trials = 3
@@ -96,4 +96,4 @@ def run(oa, tsp_n, ff_n, cp_n, cp_t, sa_cr, ga_p, ga_ma, ga_mu, ms, mk, mm):
 
 if __name__ == '__main__':
     # Run experiments
-    run()
+    main()

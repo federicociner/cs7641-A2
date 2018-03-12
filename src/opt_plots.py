@@ -147,13 +147,17 @@ def problem_complexity(opName, p='N'):
     plt.clf()
 
 
-if __name__ == '__main__':
+def main():
+    """Run code to generate plots.
+
+    """
     # group all results datasets
-    p = os.path.abspath(os.path.join(os.curdir, os.pardir, 'results/OPT/Archive'))
+    tdir = 'results/OPT/Archive/'
+    p = os.path.abspath(os.path.join(os.curdir, os.pardir, tdir))
     for root, dirs, files in os.walk(p):
         for file in files:
             if file.endswith('results.csv'):
-                group_results(resfile=os.path.join(root, file), aggtype='max')
+                group_results(resfile=os.path.join(root, file))
 
     # get result file names
     rhcRes = 'RHC_results.csv'
@@ -178,3 +182,7 @@ if __name__ == '__main__':
     problem_complexity(opName='TSP', p='N')
     problem_complexity(opName='CP', p='T')
     problem_complexity(opName='FF', p='N')
+
+
+if __name__ == '__main__':
+    main()
